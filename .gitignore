@@ -1,0 +1,5 @@
+.python-version
+/backend/__pycache__/
+backend.db
+/dist/
+
