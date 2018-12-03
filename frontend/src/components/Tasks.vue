@@ -2,6 +2,9 @@
   <div class="container">
     <div align="center">
       <div class="col-sm-8 col-md-6 col-lg-6">
+        <b-form v-if="show" action="/-/logout" method="post" >
+          <b-button type="submit">ログアウト</b-button>
+        </b-form>
       <p>タスクの登録</p>
         <b-form v-if="show">
           <b-form-group label="Title:"

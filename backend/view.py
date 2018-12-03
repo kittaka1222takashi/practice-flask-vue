@@ -1,27 +1,30 @@
-from flask import Blueprint, request, render_template
-import os, sys, requests
+from flask import Blueprint, redirect, request, render_template, url_for
+from flask_login import login_user, logout_user
 
-from flask import request, redirect, url_for, render_template, flash
-from backend import app, db
-from backend.models import Task
+from backend import db
+from backend import bootstrap
+from backend.models import User, LoginForm
 
-router = Blueprint('app', __name__,
+view = Blueprint('app', __name__,
                     template_folder='templates',
                     static_folder='templates/static')
 
-@router.route('/')
-def show_entries():
-    task = Task.query.order_by(Task.id.desc()).all()
-    return render_template('show_entries.html', task=task)
+@view.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm(request.form)
+    if form.validate_on_submit():
+        user, authenticated = User.auth(db.session.query, form.email.data, form.password.data)
+        if authenticated:
+            login_user(user, remember=True)
+            print('Login successfully.')
+            return redirect('/tasks')
+        else:
+            print('Login failed.')
+    # return str(form)
+    return render_template('login.html', form=form, action=url_for('app.login'))
 
-@router.route('/add', methods=['POST'])
-def add_entry():
-    task = Task(
-            title=request.form['title'],
-            text=request.form['text']
-            )
-    db.session.add(task)
-    db.session.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('app.show_entries'))
+@view.route('/logout', methods=['POST'])
+def logout():
+    logout_user()
+    return redirect('/login')
 
